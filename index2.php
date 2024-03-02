@@ -186,7 +186,7 @@
             <div class="box1-con">
                 <div class="box1-info">
                     <h4>EXAMPLE DATA</h4>
-                    <img src="table.png" alt="">
+                    <img src="assets/img/table.png" alt="">
                 </div>
 
                 <div class="box1-info">

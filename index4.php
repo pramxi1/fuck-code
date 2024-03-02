@@ -228,7 +228,7 @@
         <div class="container">
             <div class="graph-1">
                 <div class="graph2"></div>
-                <img src="Black.png" alt="">
+                <img src="assets/img/Black.png" alt="">
                 </div>
             </div>
         </div>

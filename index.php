@@ -160,7 +160,7 @@
         <div class="container">
             <div class="blog-con">
                 <div class="blog-item">
-                    <img src="1.png" alt="">
+                    <img src="assets/img/1.png" alt="">
                 </div>
 
                 <div class="blog-item">
