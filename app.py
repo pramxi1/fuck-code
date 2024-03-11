@@ -17,6 +17,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 cached_plot_data = None
+html_table = None
 
 
 @app.route("/")
@@ -91,6 +92,7 @@ def trend():
 @app.route("/model")
 def model():
     global cached_plot_data
+    global html_table
     # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
