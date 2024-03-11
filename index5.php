@@ -196,7 +196,7 @@
                 </div>
 
                 <div class="box1-info">
-                    <a href="index5.php" class="blog-btn">NEXT</a>
+                    <a href="index6.php" class="blog-btn">NEXT</a>
                 </div>
 
                 <div class="box-info">
