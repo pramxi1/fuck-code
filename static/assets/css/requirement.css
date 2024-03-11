@@ -72,6 +72,15 @@ nav {
   justify-content: right;
 }
 
+.hero-info p {
+  color: #fff;
+  margin-top: 10px; /* Adjust the top margin for paragraphs */
+}
+
+.hero-info-table {
+  color: #fff;
+  margin-top: 10px; /* Adjust the top margin for paragraphs */
+}
 .box1 {
   display: grid;
 }
