@@ -1,9 +1,11 @@
 import base64
 import os
 import pandas as pd
+import numpy as np
+import io
+import base64
 import matplotlib.pyplot as plt
 import matplotlib
-import io
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 

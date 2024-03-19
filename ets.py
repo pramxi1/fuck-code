@@ -1,5 +1,5 @@
+# ETS Yes
 import os
-import pandas as pd
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,6 +8,9 @@ import base64
 import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
+
+# อ่านข้อมูลจากไฟล์ CSV
+df = pd.read_csv("https://raw.githubusercontent.com/selva86/datasets/master/a10.csv")
 
 
 def run():
@@ -40,3 +43,16 @@ def run():
     with open(img_path, "rb") as img_file:
         plot_data = base64.b64encode(img_file.read()).decode()
     return plot_data, forecast
+
+
+# สร้าง DataFrame ของการทำนาย
+forecast_df = pd.DataFrame(
+    {
+        "date": pd.date_range(
+            start=df["date"].iloc[-1], periods=5, freq="M", closed="right"
+        ),
+        "Forecast": forecast,
+    }
+)
+# บันทึกตารางข้อมูลเป็นไฟล์ CSV
+forecast_df.to_csv("forecast_data.csv", index=False)

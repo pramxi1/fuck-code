@@ -1,12 +1,16 @@
 # HWS no
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 import base64
 import matplotlib.pyplot as plt
 import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
+
+# อ่านข้อมูลจาก URL
+data = pd.read_csv("https://raw.githubusercontent.com/selva86/datasets/master/a10.csv")
 
 
 def run():
