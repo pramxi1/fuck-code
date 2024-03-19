@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import io
 import base64
@@ -8,7 +9,7 @@ matplotlib.use("Agg")  # Set the backend to non-interactive
 
 
 def run():
-    df = pd.read_csv("7.csv")
+    df = pd.read_csv("uploads/7.csv")
 
     # แปลงคอลัมน์ 'Date' เป็นชนิดข้อมูล datetime
     df["date"] = pd.to_datetime(df["date"])
@@ -61,13 +62,13 @@ def run():
     plt.ylabel("Sale Amount")
     plt.legend()
     plt.grid(True)
-    # Save the plot to a bytes buffer
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format="png")
-    buffer.seek(0)
+    img_path = os.path.join("model_img", "dma.png")
 
-    # Encode the plot image to base64
-    plot_data = base64.b64encode(buffer.getvalue()).decode()
+    plt.savefig(img_path, format="png")
 
-    buffer.close()
+    # Close the plot
+    plt.close()
+    with open(img_path, "rb") as img_file:
+        plot_data = base64.b64encode(img_file.read()).decode()
+
     return plot_data, df

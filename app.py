@@ -32,6 +32,8 @@ def requirement():
 
 @app.route("/import_file", methods=["GET", "POST"])
 def import_file():
+    session["cached_plot_data"] = None
+    session["html_table"] = None
     if request.method == "POST":
         if "file" not in request.files:
             return jsonify({"message": "No file part"}), 400
@@ -39,7 +41,6 @@ def import_file():
         if file.filename == "":
             return jsonify({"message": "No selected file"}), 400
         if file:
-            cached_plot_data = None
             filename = "7.csv"
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
             return jsonify({"message": "File uploaded successfully"}), 200
@@ -53,7 +54,7 @@ def trend():
     seasonal_ = 0
 
     # อ่านข้อมูลจากไฟล์ CSV
-    df = pd.read_csv("7.csv")
+    df = pd.read_csv("uploads/7.csv")
     x = df["sale"]
 
     # ทดสอบแบบเดิม (original test) สำหรับ Mann-Kendall statistic
@@ -82,6 +83,7 @@ def trend():
     print("p-value:", s_result.p)
 
     # Store values in session
+    print(trend_, seasonal_)
     session["trend"] = trend_
     session["seasonal"] = seasonal_
     return render_template(
@@ -91,32 +93,36 @@ def trend():
 
 @app.route("/model")
 def model():
-    global cached_plot_data
-    global html_table
+    # global cached_plot_data
+    cached_plot_data = session.get("cached_plot_data", 0)
+    html_table = session.get("html_table", 0)
+    # global html_table
     # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
+    print(trend_, seasonal_)
     if cached_plot_data is None:
         if trend_ > 0 and seasonal_ > 0:
             # sma
             result, df = sma.run()
-            print(result)
+            # print(result)
         elif trend_ > 0 and seasonal_ == 0:
             # dma
             result, df = dma.run()
-            print(result)
+            # print(result)
         elif trend_ == 0 and seasonal_ > 0:
             # ets
-            result = ets.run()
-            print(result)
+            result, df = ets.run()
+            # print(result)
         else:
             # hws
-            result = hws.run()
-            print(result)
+            result, df = hws.run()
+            # print(result)
         cached_plot_data = result
+        print(df.head(10))
         # Convert DataFrame to HTML table
-        html_table = df.to_html(index=False)
+        html_table = df.head(10).to_html(index=False)
     return render_template(
         "forecast.html", result=cached_plot_data, html_table=html_table
     )
