@@ -53,7 +53,7 @@ def trend():
     seasonal_ = 0
 
     # อ่านข้อมูลจากไฟล์ CSV
-    df = pd.read_csv("7.csv")
+    df = pd.read_csv("./uploads/7.csv")
     x = df["sale"]
 
     # ทดสอบแบบเดิม (original test) สำหรับ Mann-Kendall statistic
