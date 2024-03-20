@@ -6,7 +6,7 @@
     <title>PHP Upload CSV System</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='assets/css/requirement.css') }}"
+      href="{{ url_for('static', filename='assets/css/forecast.css') }}"
     />
     <link
       href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"
@@ -34,15 +34,36 @@
 
     <section class="hero">
       <div class="container">
-        <div class="hero-con">
-          <div class="hero-info">
-            <h3>Forecasting</h3>
+        <div class="row">
+          <div class="col-lg-6 offset-lg-3">
+            <div class="center">
+              <h3>Forecasting</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero">
+      <div class="container">
+        <div class="row">
+          <div class="center" id="example">
+            <h3>Plot Example</h3>
           </div>
 
-          <div class="hero-info">
-            <h1>Plot Example</h1>
-            <img src="data:image/png;base64,{{ result }}" alt="Plot" />
-            <div class="hero-info-table">{{ html_table | safe }}</div>
+          <div class="col-md-6">
+            <div class="center">
+              <img
+                src="data:image/png;base64,{{ result }}"
+                alt="Plot"
+                class="img-fluid"
+              />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="center">
+              <div class="hero-info-table">{{ html_table | safe }}</div>
+            </div>
           </div>
         </div>
       </div>
