@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import io
 import base64
@@ -9,15 +8,22 @@ matplotlib.use("Agg")  # Set the backend to non-interactive
 
 
 def run():
-    df = pd.read_csv("uploads/7.csv")
+    df = pd.read_csv("7.csv")
 
     # แปลงคอลัมน์ 'Date' เป็นชนิดข้อมูล datetime
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors='coerce')
+
+    try:
+        # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
+        df['sale'] = df['sale'].astype(float)
+    except ValueError as e:
+        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+        df['sale'] = df['sale'].str.replace(',', '').astype(float)
 
     # คำนวณเฉลี่ยเคลื่อนที่ในระยะเวลา 3 เดือน (3-month moving average)
     df["3_month_MA_1"] = df["sale"].rolling(window=3).mean()
 
-    df["3_month_MA_1"] = df["3_month_MA_1"].shift(1)
+    df["3_month_MA_1"] = df["3_month_MA_1"]
 
     # บันทึกไฟล์ CSV หลังจากเลื่อนคอลัมน์
     df.to_csv("your_updated_file.csv", index=False)
@@ -42,7 +48,7 @@ def run():
     df["Short_MA"] = df["sale"].rolling(window=short_window).mean()
     df["Long_MA"] = df["sale"].rolling(window=long_window).mean()
     # Plot the data and DMA
-    plt.plot(df.index, df["sale"], label="Original")
+    plt.plot(df.index, df["sale"], label="Actual")
     plt.plot(
         df.index,
         df["Short_MA"],
@@ -57,18 +63,17 @@ def run():
         linestyle="--",
         color="blue",
     )
-    plt.title("DMA Plot")
+    plt.title("Double exponential moving average (DMA)")
     plt.xlabel("Date")
-    plt.ylabel("Sale Amount")
+    plt.ylabel("Value")
     plt.legend()
-    plt.grid(True)
-    img_path = os.path.join("model_img", "dma.png")
+    # Save the plot to a bytes buffer
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
 
-    plt.savefig(img_path, format="png")
+    # Encode the plot image to base64
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
 
-    # Close the plot
-    plt.close()
-    with open(img_path, "rb") as img_file:
-        plot_data = base64.b64encode(img_file.read()).decode()
-
+    buffer.close()
     return plot_data, df

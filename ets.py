@@ -1,25 +1,27 @@
-# ETS Yes
-import os
+#ETS Yes
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+import io
 import base64
 import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
-# อ่านข้อมูลจากไฟล์ CSV
-df = pd.read_csv("https://raw.githubusercontent.com/selva86/datasets/master/a10.csv")
-
-
 def run():
-    df = pd.read_csv("uploads/7.csv")
+    # อ่านข้อมูลจากไฟล์ CSV
+    df = pd.read_csv("7.csv")
+    
+    try:
+        # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
+        df['sale'] = df['sale'].astype(float)
+    except ValueError as e:
+        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+        df['sale'] = df['sale'].str.replace(',', '').astype(float)
 
     # สร้าง Exponential Smoothing State Space Model
-    model = sm.tsa.ExponentialSmoothing(
-        df["sale"], trend="add", seasonal="add", seasonal_periods=12
-    )
+    model = sm.tsa.ExponentialSmoothing(df['value'], trend='add', seasonal='add', seasonal_periods=12)
 
     # ประมาณการพารามิเตอร์และฟิตโมเดล
     fit_model = model.fit()
@@ -29,29 +31,20 @@ def run():
 
     # พล็อตกราฟข้อมูลเดิมและการทำนาย
     plt.figure(figsize=(10, 6))
-    plt.plot(df["sale"], label="Actual")
-    plt.plot(fit_model.fittedvalues, label="Fitted")
-    plt.plot(forecast, label="Forecast")
+    plt.plot(df['value'], label='Actual')
+    plt.plot(fit_model.fittedvalues, label='Fitted')
+    plt.plot(forecast, label='Forecast')
+    plt.title('Exponential Smoothing State Space Model (ETS)')
+    plt.xlabel("Date")
+    plt.ylabel("Value")
     plt.legend()
+    # Save the plot to a bytes buffer
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
 
-    img_path = os.path.join("model_img", "ets.png")
+    # Encode the plot image to base64
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
 
-    plt.savefig(img_path, format="png")
-
-    # Close the plot
-    plt.close()
-    with open(img_path, "rb") as img_file:
-        plot_data = base64.b64encode(img_file.read()).decode()
-
-    # สร้าง DataFrame ของการทำนาย
-    forecast_df = pd.DataFrame(
-        {
-            "date": pd.date_range(
-                start=df["date"].iloc[-1], periods=5, freq="M", closed="right"
-            ),
-            "Forecast": forecast,
-        }
-    )
-    # บันทึกตารางข้อมูลเป็นไฟล์ CSV
-    forecast_df.to_csv("forecast_data.csv", index=False)
-    return plot_data, forecast
+    buffer.close()
+    return plot_data, df

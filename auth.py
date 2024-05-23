@@ -9,7 +9,7 @@ auth_blueprint = Blueprint('auth', __name__, url_prefix='/auth')
 def hello():
     df = pd.read_csv("7.csv")
     # แปลงคอลัมน์ 'ds' ให้เป็น datetime
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors='coerce')
 
     # คำนวณค่า Simple Moving Average (SMA) โดยใช้ช่วงเวลา 4 วัน
     window_size = int(input("Window_size :"))

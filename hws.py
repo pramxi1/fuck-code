@@ -1,65 +1,55 @@
-# HWS no
-import os
 import pandas as pd
+import io
+import base64
+import matplotlib
 import matplotlib.pyplot as plt
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-import base64
-import matplotlib.pyplot as plt
-import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
-# อ่านข้อมูลจาก URL
-data = pd.read_csv("https://raw.githubusercontent.com/selva86/datasets/master/a10.csv")
-
-
 def run():
-    # โหลดข้อมูลจากไฟล์ CSV
-    df = pd.read_csv("uploads/7.csv")
+    # อ่านข้อมูลจาก URL
+    data = pd.read_csv("7.csv")
 
-    # แปลงข้อมูลเป็นรูปแบบ datetime
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    # ตรวจสอบและแก้ไขข้อผิดพลาดที่เกิดขึ้นเมื่อมีเครื่องหมาย ',' ในข้อมูล #แก้
+    try:
+        # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
+        data['sale'] = data['sale'].astype(float)
+    except ValueError as e:
+        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+        data['sale'] = data['sale'].str.replace(',', '').astype(float)
+        print("Handled the ValueError by removing commas.")
+
+    # แปลงข้อมูลเป็นรูปแบบ datetime #แก้
+    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors='coerce')
 
     # ตั้งค่า index เป็นวันที่
-    df.set_index("date", inplace=True)
-
-    # # สร้างโมเดล Holt-Winters ด้วยฤดูกาล
-    # model = ExponentialSmoothing(
-    #     df["sale"], seasonal_periods=4, trend="add", seasonal="add"
-    # )
-
-    # # ฟิตโมเดล
-    # model_fit = model.fit()
-
-    # # ทำนายสำหรับ 12 เดือนถัดไป
-    # forecast = model_fit.forecast(steps=5)
+    data.set_index('date', inplace=True)
 
     # สร้างโมเดล Holt-Winters' Exponential Smoothing
-    model = ExponentialSmoothing(
-        df["sale"], trend="add", seasonal="add", seasonal_periods=12
-    )
+    model = ExponentialSmoothing(data['sale'], trend='add', seasonal='add', seasonal_periods=12)
 
     # ฟิตโมเดล
     result = model.fit()
 
     # ทำนายค่าสำหรับข้อมูลในอนาคต
-    forecast = result.forecast(12)
+    df = result.forecast(12)
 
     # พล็อตข้อมูลและผลการทำนาย
-    plt.figure(figsize=(10, 6))
-    plt.plot(df.index, df["sale"], label="Actual")
-    plt.plot(forecast.index, forecast, label="Forecast", color="red")
-    plt.xlabel("Date")
-    plt.ylabel("sale")
-    plt.title("Holt-Winters' Exponential Smoothing Forecast")
+    plt.figure(figsize=(10,6))
+    plt.plot(data.index, data['sale'], label='Actual')
+    plt.plot(forecast.index, forecast, label='Forecast', color='red')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title('Holt-Winters\' Exponential Smoothing Forecast')
     plt.legend()
+    # Save the plot to a bytes buffer
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
 
-    img_path = os.path.join("model_img", "hws.png")
+    # Encode the plot image to base64
+    plot_data = base64.b64encode(buffer.getvalue()).decode()
 
-    plt.savefig(img_path, format="png")
-
-    # Close the plot
-    plt.close()
-    with open(img_path, "rb") as img_file:
-        plot_data = base64.b64encode(img_file.read()).decode()
-    return plot_data, forecast
+    buffer.close()
+    return plot_data, df

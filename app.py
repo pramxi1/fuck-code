@@ -16,8 +16,8 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-cached_plot_data = None
-html_table = None
+# cached_plot_data = None
+# html_table = None
 
 
 @app.route("/")
@@ -32,8 +32,6 @@ def requirement():
 
 @app.route("/import_file", methods=["GET", "POST"])
 def import_file():
-    session["cached_plot_data"] = None
-    session["html_table"] = None
     if request.method == "POST":
         if "file" not in request.files:
             return jsonify({"message": "No file part"}), 400
@@ -41,6 +39,10 @@ def import_file():
         if file.filename == "":
             return jsonify({"message": "No selected file"}), 400
         if file:
+            # session.pop('cached_plot_data', default=None)
+            # session.pop('html_table', default=None)
+            session['cached_plot_data'] = None
+            session['html_table'] = None
             filename = "7.csv"
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
             return jsonify({"message": "File uploaded successfully"}), 200
@@ -55,6 +57,14 @@ def trend():
 
     # อ่านข้อมูลจากไฟล์ CSV
     df = pd.read_csv("./uploads/7.csv")
+    
+    try:
+        # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
+        df['sale'] = df['sale'].astype(float)
+    except ValueError as e:
+        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+        df['sale'] = df['sale'].str.replace(',', '').str.strip("").astype(float)
+
     x = df["sale"]
 
     # ทดสอบแบบเดิม (original test) สำหรับ Mann-Kendall statistic
@@ -83,7 +93,6 @@ def trend():
     print("p-value:", s_result.p)
 
     # Store values in session
-    print(trend_, seasonal_)
     session["trend"] = trend_
     session["seasonal"] = seasonal_
     return render_template(
@@ -93,16 +102,15 @@ def trend():
 
 @app.route("/model")
 def model():
-    # global cached_plot_data
-    cached_plot_data = session.get("cached_plot_data", 0)
-    html_table = session.get("html_table", 0)
-    # global html_table
+    cached_plot_data = session['cached_plot_data']
+    html_table = session['html_table']
     # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
-    print(trend_, seasonal_)
+    print(cached_plot_data, html_table)
     if cached_plot_data is None:
+        print("in if")
         if trend_ > 0 and seasonal_ > 0:
             # sma
             result, df = sma.run()
@@ -120,13 +128,13 @@ def model():
             result, df = hws.run()
             # print(result)
         cached_plot_data = result
-        print(df.head(10))
         # Convert DataFrame to HTML table
-        html_table = df.head(10).to_html(index=False)
+        html_table = df.to_html(index=False)
+    session['cached_plot_data'] = cached_plot_data
+    session['html_table'] = html_table
     return render_template(
         "forecast.html", result=cached_plot_data, html_table=html_table
     )
-
 
 if __name__ == "__main__":
     print("Starting server on port", PORT)
