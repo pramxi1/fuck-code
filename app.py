@@ -75,9 +75,7 @@ def trend():
     print("p-value:", trend_result.p)
     print("z-score:", trend_result.z)
 
-    if trend_result.trend == "increasing":
-        trend_ += 1
-    elif trend_result.trend == "decreasing":
+    if trend_result.trend in ["increasing", "decreasing"]:
         trend_ += 1
 
     s_result = s_test.sk_test(x.values)
@@ -113,7 +111,7 @@ def model():
         print("in if")
         if trend_ > 0 and seasonal_ > 0:
             # sma
-            result, df = sma.run()
+            result, df = hws.run()
             # print(result)
         elif trend_ > 0 and seasonal_ == 0:
             # dma
@@ -125,7 +123,7 @@ def model():
             # print(result)
         else:
             # hws
-            result, df = hws.run()
+            result, df = sma.run()
             # print(result)
         cached_plot_data = result
         # Convert DataFrame to HTML table

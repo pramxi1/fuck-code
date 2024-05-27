@@ -11,7 +11,7 @@ def run():
     # อ่านข้อมูลจาก URL
     data = pd.read_csv("7.csv")
 
-    # ตรวจสอบและแก้ไขข้อผิดพลาดที่เกิดขึ้นเมื่อมีเครื่องหมาย ',' ในข้อมูล #แก้
+    # ตรวจสอบและแก้ไขข้อผิดพลาดที่เกิดขึ้นเมื่อมีเครื่องหมาย ',' ในข้อมูล
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
         data['sale'] = data['sale'].astype(float)
@@ -21,13 +21,16 @@ def run():
         print("Handled the ValueError by removing commas.")
 
     # แปลงข้อมูลเป็นรูปแบบ datetime #แก้
-    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors='coerce')
+    data['date'] = pd.to_datetime(data['date'], format='%d/%m/%y', dayfirst=True, errors='coerce')
 
     # ตั้งค่า index เป็นวันที่
     data.set_index('date', inplace=True)
 
+    # ตั้งค่า index เป็นวันที่และระบุความถี่ของข้อมูลเป็น "D" (วันละครั้ง)
+    data.index.freq = 'D'
+
     # สร้างโมเดล Holt-Winters' Exponential Smoothing
-    model = ExponentialSmoothing(data['sale'], trend='add', seasonal='add', seasonal_periods=12)
+    model = ExponentialSmoothing(data['sale'], trend='add', seasonal='add', seasonal_periods=2)
 
     # ฟิตโมเดล
     result = model.fit()
