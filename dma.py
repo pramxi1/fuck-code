@@ -8,17 +8,17 @@ matplotlib.use("Agg")  # Set the backend to non-interactive
 
 
 def run():
-    df = pd.read_csv("7.csv")
+    df = pd.read_csv("./uploads/data.csv")
 
     # แปลงคอลัมน์ 'Date' เป็นชนิดข้อมูล datetime
-    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors='coerce')
+    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors="coerce")
 
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
-        df['sale'] = df['sale'].astype(float)
+        df["sale"] = df["sale"].astype(float)
     except ValueError as e:
         # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
-        df['sale'] = df['sale'].str.replace(',', '').astype(float)
+        df["sale"] = df["sale"].str.replace(",", "").astype(float)
 
     # คำนวณเฉลี่ยเคลื่อนที่ในระยะเวลา 3 เดือน (3-month moving average)
     df["3_month_MA_1"] = df["sale"].rolling(window=3).mean()

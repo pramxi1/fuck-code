@@ -1,4 +1,4 @@
-#ETS Yes
+# ETS Yes
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,19 +9,22 @@ import matplotlib
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
+
 def run():
     # อ่านข้อมูลจากไฟล์ CSV
-    df = pd.read_csv("7.csv")
-    
+    df = pd.read_csv("./uploads/data.csv")
+
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
-        df['sale'] = df['sale'].astype(float)
+        df["sale"] = df["sale"].astype(float)
     except ValueError as e:
         # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
-        df['sale'] = df['sale'].str.replace(',', '').astype(float)
+        df["sale"] = df["sale"].str.replace(",", "").astype(float)
 
     # สร้าง Exponential Smoothing State Space Model
-    model = sm.tsa.ExponentialSmoothing(df['value'], trend='add', seasonal='add', seasonal_periods=12)
+    model = sm.tsa.ExponentialSmoothing(
+        df["value"], trend="add", seasonal="add", seasonal_periods=12
+    )
 
     # ประมาณการพารามิเตอร์และฟิตโมเดล
     fit_model = model.fit()
@@ -31,10 +34,10 @@ def run():
 
     # พล็อตกราฟข้อมูลเดิมและการทำนาย
     plt.figure(figsize=(10, 6))
-    plt.plot(df['value'], label='Actual')
-    plt.plot(fit_model.fittedvalues, label='Fitted')
-    plt.plot(forecast, label='Forecast')
-    plt.title('Exponential Smoothing State Space Model (ETS)')
+    plt.plot(df["value"], label="Actual")
+    plt.plot(fit_model.fittedvalues, label="Fitted")
+    plt.plot(forecast, label="Forecast")
+    plt.title("Exponential Smoothing State Space Model (ETS)")
     plt.xlabel("Date")
     plt.ylabel("Value")
     plt.legend()

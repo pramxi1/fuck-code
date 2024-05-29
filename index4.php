@@ -172,7 +172,7 @@
 
                     <script>
                         // โหลดไฟล์ CSV ด้วย Fetch API
-                        fetch('uploads/7.csv')
+                        fetch('uploads/data.csv')
                         .then(response => response.text())
                         .then(csvString => {
                             // แปลงข้อมูล CSV เป็นอาร์เรย์ของอ็อบเจ็กต์

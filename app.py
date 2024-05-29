@@ -41,9 +41,9 @@ def import_file():
         if file:
             # session.pop('cached_plot_data', default=None)
             # session.pop('html_table', default=None)
-            session['cached_plot_data'] = None
-            session['html_table'] = None
-            filename = "7.csv"
+            session["cached_plot_data"] = None
+            session["html_table"] = None
+            filename = "data.csv"
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
             return jsonify({"message": "File uploaded successfully"}), 200
     else:
@@ -56,14 +56,14 @@ def trend():
     seasonal_ = 0
 
     # อ่านข้อมูลจากไฟล์ CSV
-    df = pd.read_csv("./uploads/7.csv")
-    
+    df = pd.read_csv("./uploads/data.csv")
+
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
-        df['sale'] = df['sale'].astype(float)
+        df["sale"] = df["sale"].astype(float)
     except ValueError as e:
         # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
-        df['sale'] = df['sale'].str.replace(',', '').str.strip("").astype(float)
+        df["sale"] = df["sale"].str.replace(",", "").str.strip("").astype(float)
 
     x = df["sale"]
 
@@ -100,17 +100,16 @@ def trend():
 
 @app.route("/model")
 def model():
-    cached_plot_data = session['cached_plot_data']
-    html_table = session['html_table']
+    cached_plot_data = session["cached_plot_data"]
+    html_table = session["html_table"]
     # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
     print(cached_plot_data, html_table)
     if cached_plot_data is None:
-        print("in if")
         if trend_ > 0 and seasonal_ > 0:
-            # sma
+            # hws
             result, df = hws.run()
             # print(result)
         elif trend_ > 0 and seasonal_ == 0:
@@ -122,17 +121,18 @@ def model():
             result, df = ets.run()
             # print(result)
         else:
-            # hws
+            # sma
             result, df = sma.run()
             # print(result)
         cached_plot_data = result
         # Convert DataFrame to HTML table
         html_table = df.to_html(index=False)
-    session['cached_plot_data'] = cached_plot_data
-    session['html_table'] = html_table
+    session["cached_plot_data"] = cached_plot_data
+    session["html_table"] = html_table
     return render_template(
         "forecast.html", result=cached_plot_data, html_table=html_table
     )
+
 
 if __name__ == "__main__":
     print("Starting server on port", PORT)
