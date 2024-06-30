@@ -115,12 +115,13 @@ nav {
   right: -145px;
 }
 
-.box1-info img {
-  padding: 1rem;
-  width: 80%;
+.col-md-6 img {
+  padding: 2rem;
+  width: 10000px;
+  height: 500px;
   position: relative;
   top: 0px;
-  right: -30px;
+  right: -75px;
 }
 
 .box1-info h5 {
@@ -152,8 +153,8 @@ nav {
   text-decoration: none;
   align-items: end;
   position: relative;
-  top: 271px;
-  right: -400px;
+  top: 35px;
+  right: -550px;
 }
 
 .center {
@@ -161,6 +162,8 @@ nav {
   justify-content: center;
   align-items: center;
   height: 100%;
+  width: 1150px;
+  height: auto;
   text-align: center;
   color: #fff;
 }

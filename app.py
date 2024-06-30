@@ -133,6 +133,40 @@ def model():
         "forecast.html", result=cached_plot_data, html_table=html_table
     )
 
+@app.route("/model2")
+def model2():
+    cached_plot_data = session["cached_plot_data"]
+    html_table = session["html_table"]
+    # Retrieve values from session
+    trend_ = session.get("trend", 0)
+    seasonal_ = session.get("seasonal", 0)
+
+    print(cached_plot_data, html_table)
+    if cached_plot_data is None:
+        if trend_ > 0 and seasonal_ > 0:
+            # hws
+            result, df = hws.run()
+            # print(result)
+        elif trend_ > 0 and seasonal_ == 0:
+            # dma
+            result, df = dma.run()
+            # print(result)
+        elif trend_ == 0 and seasonal_ > 0:
+            # ets
+            result, df = ets.run()
+            # print(result)
+        else:
+            # sma
+            result, df = sma.run()
+            # print(result)
+        cached_plot_data = result
+        # Convert DataFrame to HTML table
+        html_table = df.to_html(index=False)
+    session["cached_plot_data"] = cached_plot_data
+    session["html_table"] = html_table
+    return render_template(
+        "forecast_table.html", result=cached_plot_data, html_table=html_table
+    )
 
 if __name__ == "__main__":
     print("Starting server on port", PORT)

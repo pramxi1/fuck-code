@@ -6,7 +6,7 @@
     <title>PHP Upload CSV System</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='assets/css/forecast.css') }}"
+      href="{{ url_for('static', filename='assets/css/forecast_table.css') }}"
     />
     <link
       href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"
@@ -31,21 +31,16 @@
         </div>
       </div>
     </nav>
-
+    
     <section class="hero">
       <div class="container">
         <div class="row">
           <div class="center" id="example">
-            <h3>Forecasting Plot Example</h3>
+            <h3>Forecasting Table Example</h3>
           </div>
-
           <div class="col-md-6">
             <div class="center">
-              <img
-                src="data:image/png;base64,{{ result }}"
-                alt="Plot"
-                class="img-fluid"
-              />
+              <div class="hero-info-table">{{ html_table | safe }}</div>
             </div>
           </div>
         </div>
@@ -55,10 +50,8 @@
     <section class="box1">
       <div class="container">
         <div class="box1-con">
-          <div class="box1-info"></div>
-
           <div class="box1-info">
-            <a href="{{ url_for('model2') }}" class="blog-btn">NEXT</a>
+            <a href="{{ url_for('model') }}" class="blog-btn">NEXT</a>
           </div>
         </div>
       </div>
