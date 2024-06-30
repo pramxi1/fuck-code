@@ -9,7 +9,7 @@ matplotlib.use("Agg")  # Set the backend to non-interactive
 
 def run():
     df = pd.read_csv("./uploads/data.csv")
-
+    df.dropna(axis=0, inplace=True)
     # แปลงคอลัมน์ 'Date' เป็นชนิดข้อมูล datetime
     df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors="coerce")
 
@@ -67,6 +67,7 @@ def run():
     plt.xlabel("Date")
     plt.ylabel("Value")
     plt.legend()
+    print(df)
     # Save the plot to a bytes buffer
     buffer = io.BytesIO()
     plt.savefig(buffer, format="png")
@@ -76,4 +77,4 @@ def run():
     plot_data = base64.b64encode(buffer.getvalue()).decode()
 
     buffer.close()
-    return plot_data, df
+    return plot_data, df.tail(12)

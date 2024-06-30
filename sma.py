@@ -53,4 +53,4 @@ def run():
     buffer.close()
 
     print(df)
-    return plot_data, df.tail(10)
+    return plot_data, df.tail(12)

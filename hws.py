@@ -45,7 +45,7 @@ def run():
     result = model.fit()
 
     # ทำนายค่าสำหรับข้อมูลในอนาคต
-    forecast = result.forecast(30)
+    forecast = result.forecast(12)
 
     # convert forecast series to dataframe
     df = forecast.to_frame(name="HWS").reset_index()
@@ -72,4 +72,4 @@ def run():
 
     buffer.close()
 
-    return plot_data, df.tail(10)
+    return plot_data, df.tail(12)

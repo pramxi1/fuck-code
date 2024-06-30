@@ -54,13 +54,14 @@
           </div>
 
           <div class="box1-info">
-            <h5>- Please import File in file.csv format.</h5>
-            <h5>- The file format must have 2 columns.</h5>
-            <h5>- The header of the first column must be named Date.</h5>
-            <h5>- The header of the second column must be named Y.</h5>
+            <h5>- กรุณา import File ในรูปแบบ file.csv ( ตั้งชื่อไฟล์อะไรก็ได้ ) </h5>
+            <h5>- รูปแบบของไฟล์ ต้องมี 2 คอลัมป์ </h5>
+            <h5>- ส่วนหัวของคอลัมป์ที่ 1 ต้องชื่อว่า date </h5>
+            <h5>- ข้อมูลในคอลัมป์ date ต้องมีรูปแบบดังตัวอย่าง 1/1/2002 </h5>
+            <h5>- ส่วนหัวของคอลัมป์ที่ 2 ต้องชื่อว่า sale </h5>
+            <h5>- ข้อมูลต้องมีอย่างน้อย 1 เดือน หรือ 30 เซลล์ ( Cell ) </h5>
             <h6>
-              Warning: If the data does not meet the requirements, the file will
-              not be usable and will not be able to predict.
+              คำเตือน: ถ้าข้อมูลไม่ตรงตามข้อกำหนด ไฟล์จะไม่สามารถใช้งานได้และจะไม่สามารถพยากรณ์ได้
             </h6>
             <a href="{{ url_for('import_file') }}" class="blog-btn">NEXT</a>
           </div>
