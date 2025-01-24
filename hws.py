@@ -71,5 +71,5 @@ def run():
     plot_data = base64.b64encode(buffer.getvalue()).decode()
 
     buffer.close()
-
+    print(df)
     return plot_data, df.tail(12)

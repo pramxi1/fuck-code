@@ -50,4 +50,5 @@ def run():
     plot_data = base64.b64encode(buffer.getvalue()).decode()
 
     buffer.close()
-    return plot_data, df.tail(12)
+    print(df)
+    return plot_data, df

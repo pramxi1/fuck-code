@@ -50,6 +50,11 @@ def import_file():
         return render_template("import_file.html")
 
 
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+from statsmodels.tsa.seasonal import seasonal_decompose
+
 @app.route("/trend")
 def trend():
     trend_ = 0
@@ -61,40 +66,64 @@ def trend():
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
         df["sale"] = df["sale"].astype(float)
-    except ValueError as e:
-        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+    except ValueError:
+        # แก้ไขข้อมูลที่มีเครื่องหมาย ',' และแปลงเป็น float
         df["sale"] = df["sale"].str.replace(",", "").str.strip("").astype(float)
 
     x = df["sale"]
 
-    # ทดสอบแบบเดิม (original test) สำหรับ Mann-Kendall statistic
+    # ทดสอบแนวโน้มด้วย Mann-Kendall Test
     trend_result = mk.original_test(x)
-
-    print("Trend:", trend_result.trend)
-    print("Hypothesis Test Result:", trend_result.h)
-    print("p-value:", trend_result.p)
-    print("z-score:", trend_result.z)
 
     if trend_result.trend in ["increasing", "decreasing"]:
         trend_ += 1
 
+    # ทดสอบฤดูกาล (Seasonality Test)
     s_result = s_test.sk_test(x.values)
 
     if s_result.p < 0.05:
         seasonal_ += 1
-        print("Seasonal: have Seasonal")
-    else:
-        print("Seasonal: no Seasonal")
-    print("S prime:", s_result.s)
-    print("Total variance:", s_result.var_s)
-    print("Z score:", s_result.z)
-    print("p-value:", s_result.p)
 
-    # Store values in session
-    session["trend"] = trend_
-    session["seasonal"] = seasonal_
+    # แยกส่วนประกอบของข้อมูลด้วย Seasonal Decomposition
+    decomposition = seasonal_decompose(x, model="additive", period=12)
+
+    # สร้างกราฟแนวโน้ม
+    trend_fig = plt.figure(figsize=(14, 6))
+    plt.plot(df.index, x, label="Original Data")
+    plt.plot(df.index, decomposition.trend, label="Trend", color="orange", linewidth=2)
+    plt.legend()
+    plt.title("Trend Analysis")
+    plt.xlabel("Index")
+    plt.ylabel("Sale")
+    plt.grid()
+
+    # แปลงกราฟเป็น base64 เพื่อฝังใน HTML
+    trend_img = BytesIO()
+    plt.savefig(trend_img, format="png")
+    trend_img.seek(0)
+    trend_base64 = base64.b64encode(trend_img.getvalue()).decode()
+
+    # สร้างกราฟฤดูกาล
+    seasonal_fig = plt.figure(figsize=(14, 6))
+    plt.plot(decomposition.seasonal, label="Seasonality", color="green")
+    plt.title("Seasonality Analysis")
+    plt.xlabel("Index")
+    plt.ylabel("Seasonal Effect")
+    plt.grid()
+
+    # แปลงกราฟเป็น base64 เพื่อฝังใน HTML
+    seasonal_img = BytesIO()
+    plt.savefig(seasonal_img, format="png")
+    seasonal_img.seek(0)
+    seasonal_base64 = base64.b64encode(seasonal_img.getvalue()).decode()
+
+    # Render HTML พร้อมส่งผลลัพธ์และกราฟ
     return render_template(
-        "trend_and_seasonal_testing.html", trend_result=trend_result, s_result=s_result
+        "trend_and_seasonal_testing.html",
+        trend_result=trend_result,
+        s_result=s_result,
+        trend_graph=trend_base64,
+        seasonal_graph=seasonal_base64,
     )
 
 

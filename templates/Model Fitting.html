@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PHP Upload CSV System</title>
+    <title>CSV Upload and Model Fitting</title>
     <link rel="stylesheet" href="../assets/css/requirement.css" />
     <link
       href="../../vendor/bootstrap/css/bootstrap.min.css"
@@ -33,7 +33,26 @@
       <div class="container">
         <div class="hero-con">
           <div class="hero-info">
-            <h3>Model Fitting</h3>
+            <h3>Model Fitting: Upload CSV File</h3>
+            <form
+              id="upload-form"
+              action="/model3"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <label for="file" class="form-label">Choose CSV file:</label>
+                <input
+                  type="file"
+                  name="file"
+                  id="file"
+                  class="form-control"
+                  accept=".csv"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Upload and Calculate</button>
+            </form>
           </div>
         </div>
       </div>
@@ -43,14 +62,43 @@
       <div class="container">
         <div class="box1-con">
           <div class="box1-info">
-            
-          </div>
-
-          <div class="box1-info">
-            <a href="../pages/Forecast Accuracy.html" class="blog-btn">NEXT</a>
+            <h4>Results:</h4>
+            <div id="results" class="result"></div>
           </div>
         </div>
       </div>
     </section>
+
+    <script>
+      // JavaScript to handle form submission and display results dynamically
+      document.getElementById("upload-form").addEventListener("submit", async function (e) {
+        e.preventDefault(); // Prevent the default form submission
+        const formData = new FormData(this);
+        
+        try {
+          const response = await fetch("/model3", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            document.getElementById("results").innerHTML =
+              `<div class="text-danger">Error: ${error.error}</div>`;
+            return;
+          }
+
+          const data = await response.json();
+          document.getElementById("results").innerHTML = `
+            <p><strong>MSE:</strong> ${data.mse}</p>
+            <p><strong>RMSE:</strong> ${data.rmse}</p>
+            <p><strong>MAPE:</strong> ${data.mape}</p>
+          `;
+        } catch (error) {
+          document.getElementById("results").innerHTML =
+            `<div class="text-danger">Unexpected error occurred: ${error.message}</div>`;
+        }
+      });
+    </script>
   </body>
 </html>

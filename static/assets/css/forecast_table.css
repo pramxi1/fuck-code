@@ -2,7 +2,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: #000000;
   }
   
   nav {
@@ -18,6 +17,7 @@
   .nav-con {
     display: flex;
     justify-content: space-between;
+    background-color: #000000;
   }
   
   .logo a {
@@ -30,6 +30,9 @@
     display: flex;
     list-style: none;
     align-items: center;
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
   }
   
   .menu li {
@@ -42,12 +45,12 @@
   }
   
   .hero {
-    background-color: #000000;
+    background-color: #ffffff;
     display: grid;
   }
   
   .hero-con {
-    background-color: #000000;
+    background-color: #ffffff;
     position: relative;
     top: 20px;
   }
@@ -62,7 +65,7 @@
   
   .hero-info h3 {
     font-size: 2rem;
-    color: #fff;
+    color: #000000;
     margin: 0;
     padding: 0;
   }
@@ -72,12 +75,12 @@
   }
   
   .hero-info p {
-    color: #fff;
+    color: #000000;
     margin-top: 10px; /* Adjust the top margin for paragraphs */
   }
   
   .hero-info-table {
-    color: #fff;
+    color: #000000;
     border-collapse: collapse;
     display: flex;
     justify-content: center;
@@ -149,8 +152,8 @@
   
   .box1-info .blog-btn {
     display: inline-block;
-    background-color: #fff;
-    color: #000000;
+    background-color: #000000;
+    color: #ffffff;
     padding: 0.5rem 1rem;
     border-radius: 5px;
     text-decoration: none;
@@ -158,6 +161,10 @@
     position: relative;
     top: -39px;
     right: -1182px;
+  }
+
+  .box1-info .blog-btn:hover {
+    background-color: #333333; /* สีปุ่มเมื่อ Hover */
   }
   
   .center {
@@ -168,10 +175,43 @@
     width: 1295px;
     height: auto;
     text-align: center;
-    color: #fff;
+    color: #000000;
   }
   
   #example {
     margin-top: 20px;
     margin-bottom: 20px;
   }
+
+  /* styles.css */
+
+/* เพิ่มการจัดการ dropdown */
+.nav-con .menu li.dropdown {
+  position: relative;
+}
+
+.nav-con .menu li.dropdown .dropdown-menu {
+  display: none; /* ซ่อนเมนูตอนเริ่มต้น */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #333;
+  border-radius: 5px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+}
+
+.nav-con .menu li.dropdown:hover .dropdown-menu {
+  display: block; /* แสดงเมนูเมื่อ hover */
+}
+
+.nav-con .menu li.dropdown .dropdown-menu li a {
+  color: #fff;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-con .menu li.dropdown .dropdown-menu li a:hover {
+  background-color: #444;
+}
