@@ -3,6 +3,7 @@ import io
 import base64
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.dates import DateFormatter
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
@@ -30,13 +31,16 @@ def run():
     df["DMA"] = df["SMA"].rolling(window=3).mean()
     
     # Plot the data and DMA
-    plt.figure(figsize=(10, 6))  # กำหนดขนาดของกราฟให้กว้างขึ้น
+    plt.figure(figsize=(10, 4))  # กำหนดขนาดของกราฟให้กว้างขึ้น
     plt.plot(df["date"], df["sale"], label="Actual", color='green')
     plt.plot(df["date"], df["SMA"], label="SMA", linestyle="--", color="red")
     plt.plot(df["date"], df["DMA"], label="DMA", linestyle="--", color="blue")
+    
+    # ตั้งค่ารูปแบบวันที่ในแกน X
+    plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: pd.to_datetime(x).strftime("%-d/%-m/%Y")))
 
-    # การปรับการแสดงผลวันที่ให้ไม่ทับกัน
-    plt.xticks(rotation=45, ha='right')  # หมุนแกน X เพื่อให้วันที่แสดงได้ชัดเจน
+    # หมุนข้อความวันที่ในแกน X เพื่อให้อ่านได้ชัดเจน
+    plt.xticks(rotation=45, ha="right")
 
     # เพิ่มชื่อหัวข้อและคำอธิบาย
     plt.title("Double Exponential Moving Average (DMA)", fontsize=14)
@@ -48,6 +52,9 @@ def run():
 
     # ปรับแต่งพื้นที่ว่างให้พอเหมาะ
     plt.tight_layout()
+    
+    # แปลงวันที่ในคอลัมน์ date ให้อยู่ในรูปแบบ 1/1/1234
+    df["date"] = df["date"].dt.strftime("%d/%m/%Y") 
 
     # Save the plot to a bytes buffer
     buffer = io.BytesIO()

@@ -4,6 +4,7 @@ import io
 import base64
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.dates import DateFormatter
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
@@ -27,9 +28,9 @@ def run():
     # Calculate Simple Moving Average (SMA)
     window_size = 3  # You can adjust the window size as needed
     df["SMA"] = df["sale"].rolling(window=window_size).mean()
-
+    
     # Plot the data and SMA
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 4))
     plt.plot(df.index, df["sale"], label="Original")
     plt.plot(
         df.index,
@@ -39,9 +40,18 @@ def run():
         color="red",
     )
     plt.title("simple moving average (SMA)")
+    # ตั้งค่ารูปแบบวันที่ในแกน x
+    plt.gca().xaxis.set_major_formatter(DateFormatter('%d/%m/%Y'))
+
+    # หมุนข้อความวันที่ในแกน x เพื่อให้อ่านง่ายขึ้น
+    plt.gcf().autofmt_xdate()
+
     plt.xlabel("Date")
     plt.ylabel("Value")
     plt.legend()
+    
+    df["date"] = df["date"].dt.strftime("%d/%m/%Y")
+    
     # Save the plot to a bytes buffer
     buffer = io.BytesIO()
     plt.savefig(buffer, format="png")

@@ -4,6 +4,7 @@ import base64
 import matplotlib
 import matplotlib.pyplot as plt
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from matplotlib.dates import DateFormatter
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
@@ -31,13 +32,15 @@ def run():
 
     # ตั้งค่า index เป็นวันที่และระบุความถี่ของข้อมูลเป็น "D" (วันละครั้ง)
     data.index.freq = "D"
+    
+    data['sale'] = data['sale'].interpolate()
 
     # สร้างโมเดล Holt-Winters' Exponential Smoothing
     model = ExponentialSmoothing(
         data["sale"],
         trend="add",
         seasonal="add",
-        seasonal_periods=12,
+        seasonal_periods=7,
         initialization_method="legacy-heuristic",
     )
 
@@ -45,23 +48,47 @@ def run():
     result = model.fit()
 
     # ทำนายค่าสำหรับข้อมูลในอนาคต
-    forecast = result.forecast(12)
+    forecast = result.forecast(30)
+    
+    # รีเซ็ต index ของข้อมูลจริงและแปลงรูปแบบวันที่
+    data_reset = data.reset_index()
+    data_reset.rename(columns={"sale": "HWS"}, inplace=True)
+    data_reset['date'] = data_reset['date'].dt.strftime('%d/%m/%Y')  # แปลงรูปแบบวันที่
+    
+    forecast_df = pd.DataFrame({
+        'date': forecast.index.strftime('%d/%m/%Y'),  # แปลงรูปแบบวันที่
+        'HWS': forecast.values
+    })
 
-    # convert forecast series to dataframe
-    df = forecast.to_frame(name="HWS").reset_index()
+    # รวมข้อมูลจริงและข้อมูลพยากรณ์เข้าด้วยกัน
+    
+    df = pd.concat([data_reset, forecast_df], ignore_index=True)
     # df.columns = ["date", "sale"]
 
     # # Adding the HWS column (3-day moving average)
     # df["HWS"] = df["sale"].rolling(window=3).mean()
 
     # พล็อตข้อมูลและผลการทำนาย
-    plt.figure(figsize=(10, 6))
-    plt.plot(data.index, data["sale"], label="Actual")
-    plt.plot(forecast.index, forecast, label="Forecast", color="red")
-    plt.xlabel("Date")
-    plt.ylabel("Value")
-    plt.title("Holt-Winters' Exponential Smoothing Forecast")
+    plt.figure(figsize=(10, 4))
+
+    # พล็อตข้อมูลจริง
+    plt.plot(data.index, data['sale'], label='Actual')
+
+    # พล็อตข้อมูลพยากรณ์
+    plt.plot(forecast.index, forecast, label='Forecast', color='red')
+
+    # ตั้งค่ารูปแบบวันที่ในแกน x
+    plt.gca().xaxis.set_major_formatter(DateFormatter('%d/%m/%Y'))
+
+    # หมุนข้อความวันที่ในแกน x เพื่อให้ดูง่ายขึ้น
+    plt.gcf().autofmt_xdate()
+
+    # เพิ่มรายละเอียดในกราฟ
+    plt.xlabel('Date')
+    plt.ylabel('Sales')
+    plt.title('Holt-Winters\' Exponential Smoothing Forecast')
     plt.legend()
+    
     # Save the plot to a bytes buffer
     buffer = io.BytesIO()
     plt.savefig(buffer, format="png")
@@ -72,4 +99,4 @@ def run():
 
     buffer.close()
     print(df)
-    return plot_data, df.tail(12)
+    return plot_data, df

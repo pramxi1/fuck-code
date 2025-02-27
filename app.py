@@ -7,6 +7,8 @@ import dma as dma
 import sma as sma
 import ets as ets
 import hws as hws
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 
 app = Flask(__name__)
 PORT = 8080
@@ -66,7 +68,7 @@ def trend():
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
         df["sale"] = df["sale"].astype(float)
-    except ValueError:
+    except ValueError as e:
         # แก้ไขข้อมูลที่มีเครื่องหมาย ',' และแปลงเป็น float
         df["sale"] = df["sale"].str.replace(",", "").str.strip("").astype(float)
 
@@ -74,6 +76,11 @@ def trend():
 
     # ทดสอบแนวโน้มด้วย Mann-Kendall Test
     trend_result = mk.original_test(x)
+    
+    print("Trend:", trend_result.trend)
+    print("Hypothesis Test Result:", trend_result.h)
+    print("p-value:", trend_result.p)
+    print("z-score:", trend_result.z)
 
     if trend_result.trend in ["increasing", "decreasing"]:
         trend_ += 1
@@ -83,7 +90,7 @@ def trend():
 
     if s_result.p < 0.05:
         seasonal_ += 1
-
+        print("Seasonal: have Seasonal")
     # แยกส่วนประกอบของข้อมูลด้วย Seasonal Decomposition
     decomposition = seasonal_decompose(x, model="additive", period=12)
 
@@ -96,6 +103,11 @@ def trend():
     plt.xlabel("Index")
     plt.ylabel("Sale")
     plt.grid()
+    
+    # ตั้งค่ารูปแบบวันที่ในแกน X
+    ax = plt.gca()
+    ax.xaxis.set_major_formatter(DateFormatter("%d/%m/%Y"))  # แสดงวันที่ในรูปแบบ DD/MM/YYYY
+    plt.gcf().autofmt_xdate()  # หมุนวันที่เพื่อไม่ให้ทับกัน
 
     # แปลงกราฟเป็น base64 เพื่อฝังใน HTML
     trend_img = BytesIO()
@@ -110,6 +122,11 @@ def trend():
     plt.xlabel("Index")
     plt.ylabel("Seasonal Effect")
     plt.grid()
+    
+    # ตั้งค่ารูปแบบวันที่ในแกน X
+    ax = plt.gca()
+    ax.xaxis.set_major_formatter(DateFormatter("%d/%m/%Y"))  # แสดงวันที่ในรูปแบบ DD/MM/YYYY
+    plt.gcf().autofmt_xdate()  # หมุนวันที่เพื่อไม่ให้ทับกัน
 
     # แปลงกราฟเป็น base64 เพื่อฝังใน HTML
     seasonal_img = BytesIO()
@@ -118,6 +135,8 @@ def trend():
     seasonal_base64 = base64.b64encode(seasonal_img.getvalue()).decode()
 
     # Render HTML พร้อมส่งผลลัพธ์และกราฟ
+    session["trend"] = trend_
+    session["seasonal"] = seasonal_
     return render_template(
         "trend_and_seasonal_testing.html",
         trend_result=trend_result,
