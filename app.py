@@ -1,13 +1,18 @@
 import os
 import pandas as pd
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 import pymannkendall as mk
 import seasonal_test as s_test
 import dma as dma
 import sma as sma
 import ets as ets
 import hws as hws
+import numpy as np
 import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+from statsmodels.tsa.seasonal import seasonal_decompose
+from accuracy import calculate_mse, calculate_rmse, calculate_mape
 from matplotlib.dates import DateFormatter
 
 app = Flask(__name__)
@@ -17,10 +22,6 @@ UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
-# cached_plot_data = None
-# html_table = None
-
 
 @app.route("/")
 def index():
@@ -70,7 +71,8 @@ def trend():
         df["sale"] = df["sale"].astype(float)
     except ValueError as e:
         # แก้ไขข้อมูลที่มีเครื่องหมาย ',' และแปลงเป็น float
-        df["sale"] = df["sale"].str.replace(",", "").str.strip("").astype(float)
+        df["sale"] = pd.to_numeric(df["sale"].str.replace(",", ""), errors='coerce')
+        df.dropna(subset=["sale"], inplace=True)  # ลบค่า NaN ที่เกิดขึ้น
 
     x = df["sale"]
 
@@ -148,74 +150,127 @@ def trend():
 
 @app.route("/model")
 def model():
-    cached_plot_data = session["cached_plot_data"]
-    html_table = session["html_table"]
-    # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
-    print(cached_plot_data, html_table)
-    if cached_plot_data is None:
-        if trend_ > 0 and seasonal_ > 0:
-            # hws
-            result, df = hws.run()
-            # print(result)
-        elif trend_ > 0 and seasonal_ == 0:
-            # dma
-            result, df = dma.run()
-            # print(result)
-        elif trend_ == 0 and seasonal_ > 0:
-            # ets
-            result, df = ets.run()
-            # print(result)
-        else:
-            # sma
-            result, df = sma.run()
-            # print(result)
-        cached_plot_data = result
-        # Convert DataFrame to HTML table
-        html_table = df.to_html(index=False)
-    session["cached_plot_data"] = cached_plot_data
-    session["html_table"] = html_table
-    return render_template(
-        "forecast.html", result=cached_plot_data, html_table=html_table
-    )
+    if trend_ > 0 and seasonal_ > 0:
+        result, df = hws.run()
+        df.rename(columns={"HWS": "predictions"}, inplace=True)
+    elif trend_ > 0 and seasonal_ == 0:
+        result, df = dma.run()
+        df.rename(columns={"DMA": "predictions"}, inplace=True)
+    elif trend_ == 0 and seasonal_ > 0:
+        result, df = ets.run()
+        df.rename(columns={"ETS": "predictions"}, inplace=True)
+    else:
+        result, df = sma.run()
+        df.rename(columns={"SMA": "predictions"}, inplace=True)
+
+    session["predictions"] = df["predictions"].tolist()
+    session["actual_values"] = df["sale"].tolist()
+    session["dates"] = df["date"].tolist()
+
+    return render_template("forecast.html", result=result, html_table=df.to_html(index=False))
+
 
 @app.route("/model2")
 def model2():
-    cached_plot_data = session["cached_plot_data"]
-    html_table = session["html_table"]
-    # Retrieve values from session
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
-    print(cached_plot_data, html_table)
-    if cached_plot_data is None:
-        if trend_ > 0 and seasonal_ > 0:
-            # hws
-            result, df = hws.run()
-            # print(result)
-        elif trend_ > 0 and seasonal_ == 0:
-            # dma
-            result, df = dma.run()
-            # print(result)
-        elif trend_ == 0 and seasonal_ > 0:
-            # ets
-            result, df = ets.run()
-            # print(result)
-        else:
-            # sma
-            result, df = sma.run()
-            # print(result)
-        cached_plot_data = result
-        # Convert DataFrame to HTML table
-        html_table = df.to_html(index=False)
-    session["cached_plot_data"] = cached_plot_data
-    session["html_table"] = html_table
+    if trend_ > 0 and seasonal_ > 0:
+        result, df = hws.run()
+        df.rename(columns={"HWS": "predictions"}, inplace=True)
+    elif trend_ > 0 and seasonal_ == 0:
+        result, df = dma.run()
+        df.rename(columns={"DMA": "predictions"}, inplace=True)
+    elif trend_ == 0 and seasonal_ > 0:
+        result, df = ets.run()
+        df.rename(columns={"ETS": "predictions"}, inplace=True)
+    else:
+        result, df = sma.run()
+        df.rename(columns={"SMA": "predictions"}, inplace=True)
+
+    session["predictions"] = df["predictions"].tolist()
+    session["actual_values"] = df["sale"].tolist()
+    session["dates"] = df["date"].tolist()
+
+    return render_template("forecast_table.html", html_table=df.to_html(index=False))
+
+
+@app.route("/forecast_accuracy")
+def forecast_accuracy():
+    predictions = session.get("predictions", [])
+    actual_values = session.get("actual_values", [])
+
+    print(f"📢 Predictions (before filtering NaN): {predictions[:10]}")
+    print(f"📢 Actual Values (before filtering NaN): {actual_values[:10]}")
+
+    if not predictions or not actual_values:
+        print("❌ No predictions or actual values available.")
+        return jsonify({"message": "No predictions or actual values available"}), 400
+
+    # แปลงเป็น numpy array และลบค่าที่เป็น NaN
+    predictions = np.array(predictions, dtype=np.float64)
+    actual_values = np.array(actual_values, dtype=np.float64)
+
+    # ✅ แทนค่าที่เป็น NaN ด้วยค่าเฉลี่ยของ actual_values
+    predictions = np.nan_to_num(predictions, nan=np.nanmean(actual_values))
+
+    # ตรวจสอบ NaN และลบแถวที่มี NaN ออก
+    mask = ~np.isnan(predictions) & ~np.isnan(actual_values)
+    predictions, actual_values = predictions[mask], actual_values[mask]
+
+    print(f"✅ Predictions (after filtering NaN): {predictions[:10]}")
+    print(f"✅ Actual Values (after filtering NaN): {actual_values[:10]}")
+
+    if len(predictions) == 0 or len(actual_values) == 0:
+        print("❌ No valid data after removing NaN.")
+        return jsonify({"message": "No valid data available for accuracy calculation"}), 400
+
+    mse_value = round(calculate_mse(predictions, actual_values), 3)
+    mape_value = round(calculate_mape(predictions, actual_values), 3)
+    rmse_value = round(calculate_rmse(predictions, actual_values), 3)
+
     return render_template(
-        "forecast_table.html", result=cached_plot_data, html_table=html_table
+        "forecast_accuracy.html",
+        mse_value=mse_value,
+        mape_value=mape_value,
+        rmse_value=rmse_value,
     )
+
+
+@app.route("/download_forecast")
+def download_forecast():
+    df_forecast = pd.DataFrame({
+        "Date": session.get("dates", []),
+        "Actual Sales": session.get("actual_values", []),
+        "Predictions": session.get("predictions", [])
+    })
+
+    output_dir = "uploads"
+    os.makedirs(output_dir, exist_ok=True)
+    forecast_file = os.path.join(output_dir, "forecast_results.csv")
+    df_forecast.to_csv(forecast_file, index=False)
+
+    return send_file(forecast_file, as_attachment=True)
+
+
+@app.route("/download_page")
+def download_page():
+    return render_template("download.html")
+
+@app.route("/download_plot")
+def download_plot():
+    # ตรวจสอบว่ามีไฟล์รูปภาพพยากรณ์หรือไม่
+    plot_file = "uploads/forecast_plot.png"  # ที่อยู่ของไฟล์รูป
+    if not os.path.exists(plot_file):
+        print("⚠️ No plot image found!")
+        return jsonify({"message": "No plot image available"}), 400
+    
+    return send_file(plot_file, as_attachment=True)
+
 
 if __name__ == "__main__":
     print("Starting server on port", PORT)
-    app.run(port=PORT)
+    app.run(port=PORT, debug=True)

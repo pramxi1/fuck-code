@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Forecast Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/download.css') }}">
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+</head>
+<body>
+    <nav>
+      <div class="container">
+        <div class="nav-con">
+          <div class="logo">
+            <a href="http://www.cmustat.com/statistics/">Statistics CMU</a>
+          </div>
+          <ul class="menu">
+            <li><a href="{{ url_for('index') }}">HOME</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">ABOUT US</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('requirement') }}">Requirement 1</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('requirement') }}">Requirement 2</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('requirement') }}">Requirement 3</a></li>
+              </ul>
+            </li>
+            <li><a href="#">ANALYSIS</a></li>
+            <li><a href="#">PORTFOLIO</a></li>
+            <li><a href="#">CONTACT US</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="download-container">
+        <h2 class="download-header">Download Forecast Results</h2>
+        <p class="download-text">คุณสามารถดาวน์โหลดข้อมูลพยากรณ์และรูปภาพได้ที่นี่</p>
+        <div class="download-buttons">
+            <a href="{{ url_for('download_forecast') }}" class="btn btn-success download-btn">
+                <img src="{{ url_for('static', filename='assets/img/csv.png') }}" alt="CSV Icon">
+                <span>ดาวน์โหลดข้อมูล CSV</span>
+            </a>
+            <a href="{{ url_for('download_plot') }}" class="btn btn-primary download-btn">
+                <img src="{{ url_for('static', filename='assets/img/line-chart.png') }}" alt="Chart Icon">
+                <span>ดาวน์โหลดกราฟ PNG</span>
+            </a>
+        </div>
+
+        <!-- ปุ่มกลับสู่หน้าแรก -->
+        <a href="{{ url_for('index') }}" class="btn btn-black">🏠 กลับสู่หน้าแรก</a>
+    </div>
+
+</body>
+</html>

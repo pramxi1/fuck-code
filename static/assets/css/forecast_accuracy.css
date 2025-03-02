@@ -165,8 +165,6 @@
 
   .box1-info .blog-btn:hover {
     background-color: #333333; /* สีปุ่มเมื่อ Hover */
-    transform: scale(1.05); /* ขยายเล็กน้อย */
-    color: #ffffff !important;
   }
   
   .center {
@@ -207,13 +205,21 @@
   display: block; /* แสดงเมนูเมื่อ hover */
 }
 
-.nav-con .menu li.dropdown .dropdown-menu li a {
-  color: #fff;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  display: block;
+.btn-black {
+    background-color: #000000 !important; /* บังคับให้ปุ่มเป็นสีดำ */
+    color: #ffffff !important; /* บังคับให้ตัวหนังสือเป็นสีขาว */
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 18px; /* เพิ่มขนาดตัวอักษร */
+    font-weight: normal; /* ตัวอักษรธรรมดา */
+    display: inline-block;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    border: none;
 }
 
-.nav-con .menu li.dropdown .dropdown-menu li a:hover {
-  background-color: #444;
+.btn-black:hover {
+    background-color: #333333 !important; /* สีเทาเมื่อ hover */
+    transform: scale(1.05); /* ทำให้ปุ่มขยายเล็กน้อยเมื่อ hover */
+    color: #ffffff !important; /* คงสีตัวหนังสือเป็นสีขาว */
 }

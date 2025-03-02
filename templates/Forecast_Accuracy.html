@@ -3,15 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PHP Upload CSV System</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='assets/css/forecast_table.css') }}"
-    />
-    <link
-      href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"
-      rel="stylesheet"
-    />
+    <title>Forecast Accuracy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/forecast_accuracy.css') }}" />
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" />
     <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   </head>
   <body>
@@ -38,30 +32,35 @@
         </div>
       </div>
     </nav>
-    
-    <section class="hero">
-      <div class="container">
-        <div class="row">
-          <div class="center" id="example">
-            <h3>Forecasting Table Example</h3>
-          </div>
-          <div class="col-md-6">
-            <div class="center">
-              <div class="hero-info-table">{{ html_table | safe }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="box1">
-      <div class="container">
-        <div class="box1-con">
-          <div class="box1-info">
-            <a href="/forecast_accuracy" class="blog-btn">NEXT</a>
-          </div>
-        </div>
+    <div class="container mt-5">
+      <h1 class="text-center">Forecast Accuracy</h1>
+      <table class="table table-bordered mt-4">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MSE (Mean Squared Error)</td>
+            <td>{{ mse_value }}</td>
+          </tr>
+          <tr>
+            <td>RMSE (Root Mean Squared Error)</td>
+            <td>{{ rmse_value }}</td>
+          </tr>
+          <tr>
+            <td>MAPE (Mean Absolute Percentage Error)</td>
+            <td>{{ mape_value }}%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-center mt-4">
+        <a href="{{ url_for('download_page') }}" class="btn btn-black">➡ ไปหน้าดาวน์โหลด</a>
       </div>
-    </section>
+    </div>
   </body>
 </html>

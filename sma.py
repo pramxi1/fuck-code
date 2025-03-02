@@ -5,6 +5,7 @@ import base64
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.dates import DateFormatter
+import os
 
 matplotlib.use("Agg")  # Set the backend to non-interactive
 
@@ -61,6 +62,13 @@ def run():
     plot_data = base64.b64encode(buffer.getvalue()).decode()
 
     buffer.close()
+    
+    # **✅ บันทึกไฟล์รูปภาพ**
+    output_dir = "uploads"
+    os.makedirs(output_dir, exist_ok=True)  # สร้างโฟลเดอร์ถ้ายังไม่มี
+    plot_file = os.path.join(output_dir, "forecast_plot.png")
+    plt.savefig(plot_file, format="png")  # บันทึกไฟล์
+    print(f"✅ Plot saved: {plot_file}")
 
     print(df)
     return plot_data, df

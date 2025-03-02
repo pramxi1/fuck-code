@@ -138,6 +138,8 @@ nav {
 
 .blog-item :hover {
   background-color: #333333; /* สีปุ่มเมื่อ Hover */
+  transform: scale(1.05); /* ขยายเล็กน้อย */
+  color: #ffffff !important;
 }
 
 .hero-img {

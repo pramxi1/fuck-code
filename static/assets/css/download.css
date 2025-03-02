@@ -1,0 +1,134 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+nav {
+  padding: 1rem;
+  background-color: #000000;
+}
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.nav-con {
+  display: flex;
+  justify-content: space-between;
+  background-color: #000000;
+}
+
+.logo a {
+  font-size: 2rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.menu {
+  display: flex;
+  list-style: none;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+}
+
+.menu li {
+  margin: 0 1rem;
+}
+
+.menu li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* จัดตำแหน่งเนื้อหาให้อยู่กลาง */
+.download-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;  /* ปรับให้เนื้อหาอยู่กลางจอ */
+  text-align: center;
+}
+
+/* ปรับขนาดตัวอักษรของหัวข้อหลัก */
+.download-container h2 {
+  font-size: 48px; /* ขยายขนาดตัวอักษร */
+  font-weight: bolder; /* ทำให้ตัวหนา */
+  margin-bottom: 15px; /* เพิ่มระยะห่างข้างล่าง */
+}
+
+.download-text {
+  font-size: 18px;
+  text-align: center;
+  margin-top: 10px; /* ปรับระยะห่างข้อความ */
+}
+
+/* ปุ่มดาวน์โหลด */
+.download-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 30px; /* ระยะห่างระหว่างปุ่ม */
+  margin-top: 30px; /* ขยับลง */
+}
+
+.download-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;  /* **ทำให้ไอคอนและข้อความอยู่กึ่งกลาง** */
+  text-align: center;
+  width: 200px;  /* ปรับขนาดปุ่มใหญ่ขึ้น */
+  height: 200px; /* ความสูงปุ่ม */
+  font-size: 18px; /* ขนาดตัวอักษร */
+  font-weight: bold;
+  padding: 15px;
+  border-radius: 12px; /* มุมโค้ง */
+  transition: transform 0.2s;
+}
+
+.download-btn:hover {
+  transform: scale(1.05); /* ขยายเล็กน้อยเมื่อ hover */
+}
+
+/* ปรับขนาดไอคอน */
+.download-btn img {
+  width: 70px;  /* ปรับขนาดรูป */
+  height: 70px;
+  margin-bottom: 15px; /* **ปรับระยะห่างของไอคอนกับข้อความให้สมดุล** */
+}
+
+/* ทำให้ตัวหนังสืออยู่ล่างสุด */
+.download-btn span {
+  display: block;
+  font-size: 16px; /* ปรับขนาดตัวอักษร */
+  text-align: center;
+}
+
+/* ปุ่มกลับหน้าแรก */
+.back-btn {
+  margin-top: 50px; /* ปรับระยะห่างของปุ่มกลับหน้าแรก */
+}
+
+.btn-black {
+  margin-top: 50px; /* ปรับระยะห่างของปุ่มกลับหน้าแรก */
+  background-color: #000000 !important; /* ปุ่มสีดำ */
+  color: #ffffff !important; /* ตัวหนังสือสีขาว */
+  padding: 10px 20px; /* ขยายขนาดปุ่ม */
+  border-radius: 8px; /* โค้งมนเล็กน้อย */
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: normal; /* ตัวอักษรธรรมดา */
+  display: inline-block;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  border: none;
+}
+
+.btn-black:hover {
+  background-color: #333333 !important; /* เปลี่ยนเป็นสีเทาเมื่อ hover */
+  transform: scale(1.05); /* ขยายเล็กน้อย */
+  color: #ffffff !important;
+}

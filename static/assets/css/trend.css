@@ -118,5 +118,6 @@ section.graphs img {
 
 .text-center .btn:hover {
   background-color: #333333;
-  border: 0; 
+  transform: scale(1.05); /* ขยายเล็กน้อย */
+  color: #ffffff !important;
 }

@@ -120,10 +120,13 @@ nav {
   padding: 0.5rem 1rem;
   position:fixed;
   left: 47%;
+  border: none; /* เอาเส้นขอบออก */
 }
 
 .d-sm-flex input:hover {
-  background-color: #000000;
+  background-color: #333;
+  transform: scale(1.05); /* ขยายเล็กน้อย */
+  color: #ffffff !important;
 }
 
 /* ปุ่ม NEXT */
@@ -142,7 +145,8 @@ nav {
 
 .blog-item :hover {
   background-color: #333333; /* สีปุ่มเมื่อ Hover */
-  color: #ffffff;
+  transform: scale(1.05); /* ขยายเล็กน้อย */
+  color: #ffffff !important;
 }
 
 /* การจัดการ layout */
