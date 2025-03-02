@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PHP Upload CSV System</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='assets/css/trend.css') }}"
+    />
+    <link
+      href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}"
+      rel="stylesheet"
+    />
+    <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  </head>
+  <body>
+    <nav>
+      <div class="container">
+        <div class="nav-con">
+          <div class="logo">
+            <a href="http://www.cmustat.com/statistics/">Statistics CMU</a>
+          </div>
+          <ul class="menu">
+            <li><a href="{{ url_for('index') }}">HOME</a></li>
+            <li><a href="#">ABOUT US</a></li>
+            <li><a href="#">WORK</a></li>
+            <li><a href="#">PORTFOLIO</a></li>
+            <li><a href="#">CONTACT US</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-con">
+          <div class="hero-info">
+            <h3>Trend and Seasonal Testing</h3>
+          </div>
+
+          <div class="hero-info">
+            <p><strong>Trend:</strong> {{ trend_result.trend }}</p>
+            <p><strong>Hypothesis Test Result:</strong> {{ trend_result.h }}</p>
+            <p><strong>p-value:</strong> {{ trend_result.p }}</p>
+            <p><strong>z-score:</strong> {{ trend_result.z }}</p>
+          </div>
+
+          <div class="hero-info">
+            <p><strong>S prime:</strong> {{ s_result.s }}</p>
+            <p><strong>Total variance:</strong> {{ s_result.var_s }}</p>
+            <p><strong>p-value:</strong> {{ s_result.p }}</p>
+            <p><strong>z-score:</strong> {{ s_result.z }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="box1">
+      <div class="container">
+        <div class="box1-con">
+          <div class="box1-info"></div>
+
+          <div class="box1-info">
+            <a href="{{ url_for('model') }}" class="blog-btn">NEXT</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
+
+@app.route("/trend")
+def trend():
+    trend_ = 0
+    seasonal_ = 0
+
+    # อ่านข้อมูลจากไฟล์ CSV
+    df = pd.read_csv("./uploads/data.csv")
+
+    try:
+        # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float
+        df["sale"] = df["sale"].astype(float)
+    except ValueError as e:
+        # หากเกิดข้อผิดพลาด ValueError: could not convert string to float: '3,977.33' ใช้การแทนที่ด้วยการลบเครื่องหมาย ',' และแปลงเป็น float
+        df["sale"] = df["sale"].str.replace(",", "").str.strip("").astype(float)
+
+    x = df["sale"]
+
+    # ทดสอบแบบเดิม (original test) สำหรับ Mann-Kendall statistic
+    trend_result = mk.original_test(x)
+
+    print("Trend:", trend_result.trend)
+    print("Hypothesis Test Result:", trend_result.h)
+    print("p-value:", trend_result.p)
+    print("z-score:", trend_result.z)
+
+    if trend_result.trend in ["increasing", "decreasing"]:
+        trend_ += 1
+
+    s_result = s_test.sk_test(x.values)
+    
+    if s_result.p < 0.05:
+        seasonal_ += 1
+        print("Seasonal: have Seasonal")
+    else:
+        print("Seasonal: no Seasonal")
+    print("S prime:", s_result.s)
+    print("Total variance:", s_result.var_s)
+    print("Z score:", s_result.z)
+    print("p-value:", s_result.p)
+
+    # Store values in session
+    session["trend"] = trend_
+    session["seasonal"] = seasonal_
+    return render_template(
+        "trend_and_seasonal_testing.html", trend_result=trend_result, s_result=s_result
+    )

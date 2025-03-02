@@ -12,7 +12,12 @@ def run():
     df = pd.read_csv("./uploads/data.csv")
     df.dropna(axis=0, inplace=True)
     # แปลงคอลัมน์ 'Date' เป็นชนิดข้อมูล datetime
-    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors="coerce")
+    # ✅ ตรวจสอบว่าคอลัมน์ date มีอยู่และเป็น datetime
+    if "date" in data.columns:
+        data["date"] = pd.to_datetime(data["date"], errors="coerce")
+        data.set_index("date", inplace=True)
+    else:
+        print("⚠️ Warning: No 'date' column found in dataset. Using default index.")
 
     try:
         # พยายามแปลงข้อมูลในคอลัมน์ 'sale' เป็น float

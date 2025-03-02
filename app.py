@@ -14,14 +14,22 @@ import base64
 from statsmodels.tsa.seasonal import seasonal_decompose
 from accuracy import calculate_mse, calculate_rmse, calculate_mape
 from matplotlib.dates import DateFormatter
+from flask_session import Session  # ✅ Import Flask-Session
 
-app = Flask(__name__)
-PORT = 8080
+app = Flask(__name__)  # ✅ ประกาศตัวเดียว
 
+# ✅ ตั้งค่าให้ใช้ Flask-Session (เก็บ session ในเครื่องเซิร์ฟเวอร์)
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_FILE_DIR"] = "./session_data"  # กำหนดโฟลเดอร์เก็บ session
+Session(app)  # ✅ เปิดใช้งาน Flask-Session
+
+PORT = 8080  # ✅ กำหนดพอร์ตที่เดียว
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # ✅ เก็บ session อย่างปลอดภัย
 
 @app.route("/")
 def index():
@@ -150,87 +158,122 @@ def trend():
 
 @app.route("/model")
 def model():
+    # ✅ ล้างค่าเก่าใน session ก่อน
+    for key in ["predictions", "actual_values", "dates", "cached_plot_data"]:
+        session.pop(key, None)
+
+    session.modified = True  # ✅ บังคับให้ Flask จำ session ใหม่
+
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
     if trend_ > 0 and seasonal_ > 0:
+        print("🔥 Running HWS Model...")
         result, df = hws.run()
-        df.rename(columns={"HWS": "predictions"}, inplace=True)
+        df.rename(columns={"HWS_Forecast": "predictions"}, inplace=True)
     elif trend_ > 0 and seasonal_ == 0:
+        print("🔥 Running DMA Model...")
         result, df = dma.run()
         df.rename(columns={"DMA": "predictions"}, inplace=True)
     elif trend_ == 0 and seasonal_ > 0:
+        print("🔥 Running ETS Model...")
         result, df = ets.run()
         df.rename(columns={"ETS": "predictions"}, inplace=True)
     else:
+        print("🔥 Running SMA Model...")  # ถ้าไม่มี trend และ seasonality จะใช้ SMA
         result, df = sma.run()
         df.rename(columns={"SMA": "predictions"}, inplace=True)
 
-    session["predictions"] = df["predictions"].tolist()
-    session["actual_values"] = df["sale"].tolist()
-    session["dates"] = df["date"].tolist()
+    # ✅ บันทึก session (เก็บแค่ค่าบางส่วน)
+    session["dates"] = df.index.astype(str).tolist()
+    session["predictions"] = df["predictions"].tolist()[:100]  # ✅ เก็บแค่ 100 ตัวแรก
+    session["actual_values"] = df["sale"].tolist()[:100]  # ✅ เก็บแค่ 100 ตัวแรก
+
+    session.modified = True  # ✅ บังคับ Flask ให้รู้ว่า session เปลี่ยนแปลงแล้ว
+
+    print(f"✅ Predictions stored in session (first 10): {session['predictions'][:10]}")
+    print(f"✅ Actual values stored in session (first 10): {session['actual_values'][:10]}")
 
     return render_template("forecast.html", result=result, html_table=df.to_html(index=False))
 
 
 @app.route("/model2")
 def model2():
+    # ✅ ล้างค่าเก่าใน session ก่อน
+    for key in ["predictions", "actual_values", "dates", "cached_plot_data"]:
+        session.pop(key, None)
+
+    session.modified = True  # ✅ บังคับให้ Flask จำ session ใหม่
+
     trend_ = session.get("trend", 0)
     seasonal_ = session.get("seasonal", 0)
 
     if trend_ > 0 and seasonal_ > 0:
+        print("🔥 Running HWS Model...")
         result, df = hws.run()
-        df.rename(columns={"HWS": "predictions"}, inplace=True)
+        df.rename(columns={"HWS_Forecast": "predictions"}, inplace=True)
     elif trend_ > 0 and seasonal_ == 0:
+        print("🔥 Running DMA Model...")
         result, df = dma.run()
         df.rename(columns={"DMA": "predictions"}, inplace=True)
     elif trend_ == 0 and seasonal_ > 0:
+        print("🔥 Running ETS Model...")
         result, df = ets.run()
         df.rename(columns={"ETS": "predictions"}, inplace=True)
     else:
+        print("🔥 Running SMA Model...")  # ถ้าไม่มี trend และ seasonality จะใช้ SMA
         result, df = sma.run()
         df.rename(columns={"SMA": "predictions"}, inplace=True)
+
+    if "date" not in df.columns:
+        df["date"] = df.index.strftime("%d/%m/%Y")  # เพิ่มคอลัมน์ date ถ้าไม่มี
+    
+    column_order = ["date"] + [col for col in df.columns if col != "date"]
+    df = df[column_order]
 
     session["predictions"] = df["predictions"].tolist()
     session["actual_values"] = df["sale"].tolist()
     session["dates"] = df["date"].tolist()
+    session["cached_plot_data"] = result  # ✅ อัปเดตผลลัพธ์ใหม่
+    session.modified = True  # ✅ บังคับให้ Flask อัปเดต session
+
+    print(f"✅ Predictions stored in session: {session['predictions'][:10]}")
+    print(f"✅ Actual values stored in session: {session['actual_values'][:10]}")
+
 
     return render_template("forecast_table.html", html_table=df.to_html(index=False))
 
-
 @app.route("/forecast_accuracy")
 def forecast_accuracy():
-    predictions = session.get("predictions", [])
-    actual_values = session.get("actual_values", [])
-
-    print(f"📢 Predictions (before filtering NaN): {predictions[:10]}")
-    print(f"📢 Actual Values (before filtering NaN): {actual_values[:10]}")
-
-    if not predictions or not actual_values:
-        print("❌ No predictions or actual values available.")
+    # ✅ ตรวจสอบว่าข้อมูลพยากรณ์ยังอยู่หรือไม่
+    if "predictions" not in session or "actual_values" not in session:
+        print("⚠️ ไม่มีข้อมูลพยากรณ์หรือค่าจริงใน Session")
         return jsonify({"message": "No predictions or actual values available"}), 400
 
-    # แปลงเป็น numpy array และลบค่าที่เป็น NaN
+    predictions = session["predictions"]
+    actual_values = session["actual_values"]
+
+    if len(predictions) == 0 or len(actual_values) == 0:
+        print("⚠️ ไม่มีข้อมูลพยากรณ์ที่สามารถใช้ได้")
+        return jsonify({"message": "No valid data available for accuracy calculation"}), 400
+
+    print(f"📢 Session Predictions: {predictions[:10]}")
+    print(f"📢 Session Actual Values: {actual_values[:10]}")
+
     predictions = np.array(predictions, dtype=np.float64)
     actual_values = np.array(actual_values, dtype=np.float64)
 
-    # ✅ แทนค่าที่เป็น NaN ด้วยค่าเฉลี่ยของ actual_values
+    # ✅ แทนค่า NaN ด้วยค่าเฉลี่ยของ actual_values
     predictions = np.nan_to_num(predictions, nan=np.nanmean(actual_values))
 
-    # ตรวจสอบ NaN และลบแถวที่มี NaN ออก
     mask = ~np.isnan(predictions) & ~np.isnan(actual_values)
     predictions, actual_values = predictions[mask], actual_values[mask]
-
-    print(f"✅ Predictions (after filtering NaN): {predictions[:10]}")
-    print(f"✅ Actual Values (after filtering NaN): {actual_values[:10]}")
-
-    if len(predictions) == 0 or len(actual_values) == 0:
-        print("❌ No valid data after removing NaN.")
-        return jsonify({"message": "No valid data available for accuracy calculation"}), 400
 
     mse_value = round(calculate_mse(predictions, actual_values), 3)
     mape_value = round(calculate_mape(predictions, actual_values), 3)
     rmse_value = round(calculate_rmse(predictions, actual_values), 3)
+
+    print(f"🎯 Final MSE: {mse_value}, MAPE: {mape_value}, RMSE: {rmse_value}")
 
     return render_template(
         "forecast_accuracy.html",
