@@ -18,11 +18,9 @@
     <nav>
       <div class="container">
         <div class="nav-con">
-          <!-- โลโก้ด้านซ้าย -->
           <div class="logo">
             <a href="http://www.cmustat.com/statistics/">Statistics CMU</a>
           </div>
-          <!-- เมนูด้านขวา -->
           <ul class="menu">
             <li><a href="{{ url_for('index') }}">HOME</a></li>
             <li class="dropdown">
@@ -44,31 +42,44 @@
     <div class="container mt-5">
       <h1 class="text-center">Trend and Seasonal Testing</h1>
 
-      <!-- Results Section -->
       <section class="results my-4">
         <h3>Trend Analysis</h3>
-        <p><strong>Trend:</strong> {{ trend_result.trend }}</p>
-        <p><strong>Hypothesis Test Result:</strong> {{ trend_result.h }}</p>
-        <p><strong>p-value:</strong> {{ trend_result.p }}</p>
-        <p><strong>z-score:</strong> {{ trend_result.z }}</p>
+        {% if trend_result %}
+          <p><strong>Trend:</strong> {{ trend_result.trend }}</p>
+          <p><strong>Hypothesis Test Result:</strong> {{ trend_result.h }}</p>
+          <p><strong>p-value:</strong> {{ trend_result.p }}</p>
+          <p><strong>z-score:</strong> {{ trend_result.z }}</p>
+        {% else %}
+          <p>No trend data available.</p>
+        {% endif %}
 
         <h3>Seasonality Analysis</h3>
-        <p><strong>Seasonal:</strong> {% if s_result.p < 0.05 %} Have Seasonal {% else %} No Seasonal {% endif %}</p>
-        <p><strong>S prime:</strong> {{ s_result.s }}</p>
-        <p><strong>Total variance:</strong> {{ s_result.var_s }}</p>
-        <p><strong>p-value:</strong> {{ s_result.p }}</p>
+        {% if s_result %}
+          <p><strong>Seasonal:</strong> {% if s_result.p < 0.05 %} Have Seasonal {% else %} No Seasonal {% endif %}</p>
+          <p><strong>S prime:</strong> {{ s_result.s if s_result.s is defined and s_result.s is not none else 'N/A' }}</p>
+          <p><strong>Total variance:</strong> {{ s_result.var_s if s_result.var_s is defined and s_result.var_s is not none else 'N/A' }}</p>
+          <p><strong>p-value:</strong> {{ s_result.p }}</p>
+        {% else %}
+          <p>No seasonality data available.</p>
+        {% endif %}
       </section>
 
-      <!-- Graphs Section -->
       <section class="graphs my-4">
         <h3>Trend Graph</h3>
-        <img src="data:image/png;base64,{{ trend_graph }}" alt="Trend Graph" class="img-fluid" />
+        {% if trend_graph %}
+          <img src="data:image/png;base64,{{ trend_graph }}" alt="Trend Graph" class="img-fluid" />
+        {% else %}
+          <p>No trend graph available.</p>
+        {% endif %}
 
         <h3>Seasonality Graph</h3>
-        <img src="data:image/png;base64,{{ seasonal_graph }}" alt="Seasonality Graph" class="img-fluid" />
+        {% if seasonal_graph %}
+          <img src="data:image/png;base64,{{ seasonal_graph }}" alt="Seasonality Graph" class="img-fluid" />
+        {% else %}
+          <p>No seasonality graph available.</p>
+        {% endif %}
       </section>
 
-      <!-- Navigation Section -->
       <div class="text-center my-4">
         <a href="{{ url_for('model') }}" class="btn btn-primary">NEXT</a>
       </div>

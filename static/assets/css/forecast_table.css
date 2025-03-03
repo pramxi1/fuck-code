@@ -207,13 +207,3 @@
   display: block; /* แสดงเมนูเมื่อ hover */
 }
 
-.nav-con .menu li.dropdown .dropdown-menu li a {
-  color: #fff;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  display: block;
-}
-
-.nav-con .menu li.dropdown .dropdown-menu li a:hover {
-  background-color: #444;
-}

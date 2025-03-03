@@ -8,7 +8,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # ใช้ non-interactive mode
 
-def run():
+def run(forecast_type="standard"):
     # โหลดข้อมูลจากไฟล์ CSV
     data = pd.read_csv("./uploads/data.csv")
 
@@ -72,11 +72,16 @@ def run():
                 (1 - gamma) * data.iloc[t - seasonal_periods]["Seasonal"]
             )
             
-            # คำนวณค่าพยากรณ์
-            data.iloc[t, data.columns.get_loc("HWS_Forecast")] = (
-                (data.iloc[t, data.columns.get_loc("Level")] + data.iloc[t, data.columns.get_loc("Trend")]) * 
-                data.iloc[t - seasonal_periods, data.columns.get_loc("Seasonal")]
-            )
+            # คำนวณค่าพยากรณ์แบบเลือกได้
+            if forecast_type == "standard":
+                data.iloc[t, data.columns.get_loc("HWS_Forecast")] = (
+                    (data.iloc[t, data.columns.get_loc("Level")] + data.iloc[t, data.columns.get_loc("Trend")]) * 
+                    data.iloc[t - seasonal_periods, data.columns.get_loc("Seasonal")]
+                )
+            elif forecast_type == "alternative":
+                data.iloc[t, data.columns.get_loc("HWS_Forecast")] = (
+                    data.iloc[t, data.columns.get_loc("Level")] * data.iloc[t, data.columns.get_loc("Seasonal")]
+                )
         else:
             # ก่อนถึงช่วง Seasonal Period ใช้ Level + Trend เป็น Forecast
             data.iloc[t, data.columns.get_loc("Level")] = (
@@ -90,13 +95,9 @@ def run():
             data.iloc[t, data.columns.get_loc("HWS_Forecast")] = (
                 data.iloc[t]["Level"] + data.iloc[t]["Trend"]
             )
-    
-    # ปรับค่าทศนิยมให้เป็น 2 ตำแหน่ง
-    data = data.round(3)
 
-    # แก้ไขค่าที่อาจเป็น NaN หรือ Infinite
-    data["HWS_Forecast"].replace([np.inf, -np.inf], np.nan, inplace=True)
-    data["HWS_Forecast"].fillna(data["sale"].mean(), inplace=True)
+    # ปรับค่าทศนิยมให้เป็น 3 ตำแหน่ง
+    data = data.round(3)
 
     # คำนวณค่าความผิดพลาด
     error = data["sale"] - data["HWS_Forecast"]

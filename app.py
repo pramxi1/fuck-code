@@ -15,6 +15,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from accuracy import calculate_mse, calculate_rmse, calculate_mape
 from matplotlib.dates import DateFormatter
 from flask_session import Session  # ✅ Import Flask-Session
+from statsmodels.tsa.stattools import adfuller
 
 app = Flask(__name__)  # ✅ ประกาศตัวเดียว
 
@@ -102,7 +103,7 @@ def trend():
         seasonal_ += 1
         print("Seasonal: have Seasonal")
     # แยกส่วนประกอบของข้อมูลด้วย Seasonal Decomposition
-    decomposition = seasonal_decompose(x, model="additive", period=12)
+    decomposition = seasonal_decompose(x, model="additive", period=30)
 
     # สร้างกราฟแนวโน้ม
     trend_fig = plt.figure(figsize=(14, 6))
@@ -178,7 +179,8 @@ def model():
     elif trend_ == 0 and seasonal_ > 0:
         print("🔥 Running ETS Model...")
         result, df = ets.run()
-        df.rename(columns={"ETS": "predictions"}, inplace=True)
+        # แก้ไข: ใช้ชื่อคอลัมน์ 'forecast' ที่ได้จาก ETS
+        df.rename(columns={"forecast": "predictions"}, inplace=True)  # แก้ไขคอลัมน์ที่ถูกต้อง
     else:
         print("🔥 Running SMA Model...")  # ถ้าไม่มี trend และ seasonality จะใช้ SMA
         result, df = sma.run()
@@ -219,7 +221,8 @@ def model2():
     elif trend_ == 0 and seasonal_ > 0:
         print("🔥 Running ETS Model...")
         result, df = ets.run()
-        df.rename(columns={"ETS": "predictions"}, inplace=True)
+        # แก้ไข: ใช้ชื่อคอลัมน์ 'forecast' ที่ได้จาก ETS
+        df.rename(columns={"forecast": "predictions"}, inplace=True)  # แก้ไขคอลัมน์ที่ถูกต้อง
     else:
         print("🔥 Running SMA Model...")  # ถ้าไม่มี trend และ seasonality จะใช้ SMA
         result, df = sma.run()

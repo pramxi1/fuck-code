@@ -132,3 +132,25 @@ nav {
   transform: scale(1.05); /* ขยายเล็กน้อย */
   color: #ffffff !important;
 }
+
+  /* styles.css */
+
+/* เพิ่มการจัดการ dropdown */
+.nav-con .menu li.dropdown {
+  position: relative;
+}
+
+.nav-con .menu li.dropdown .dropdown-menu {
+  display: none; /* ซ่อนเมนูตอนเริ่มต้น */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #333;
+  border-radius: 5px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+}
+
+.nav-con .menu li.dropdown:hover .dropdown-menu {
+  display: block; /* แสดงเมนูเมื่อ hover */
+}

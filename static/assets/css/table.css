@@ -68,17 +68,6 @@ nav {
   display: block;
 }
 
-.menu li.dropdown .dropdown-menu li a {
-  color: #fff;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  display: block;
-}
-
-.menu li.dropdown .dropdown-menu li a:hover {
-  background-color: #444;
-}
-
 .hero {
   background-color: #ffffff;
   padding: 2rem 0;
